@@ -1,5 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react-hooks";
 
 test("按钮点击", () => {
   const onClick = jest.fn(); // 测试函数
@@ -94,4 +95,46 @@ test("测试定时器", () => {
   jest.runAllTimers(); // 执行所有timer
   expect(fn).toBeCalled();
   jest.useRealTimers(); // 使用realTimer
+});
+
+test("snapshot 测试", () => {
+  const Demo = () => (
+    <form>
+      <input name="test" type="text" />
+      <button type="submit">submit</button>
+    </form>
+  );
+  const { asFragment } = render(<Demo />);
+  expect(asFragment()).toMatchSnapshot();
+});
+
+test("Hooks 测试", () => {
+  const useCounter = () => {
+    const [count, setCount] = React.useState(0);
+    const increment = React.useCallback(() => setCount((x) => x + 1), []);
+    return { count, increment };
+  };
+  const { result } = renderHook(() => useCounter());
+  // result.current 包含hooks的返回值
+  expect(result.current.count).toBe(0);
+  // result.current.increment()的调用需要放在waitFor里
+  waitFor(() => result.current.increment());
+  expect(result.current.count).toBe(1);
+});
+
+test("异步 Hooks 测试", async () => {
+  const useCounter = () => {
+    const [count, setCount] = React.useState(0);
+    const incrementAsync = React.useCallback(
+      () => setTimeout(() => setCount((x) => x + 1), 100),
+      []
+    );
+    return { count, incrementAsync };
+  };
+
+  const { result, waitForNextUpdate } = renderHook(() => useCounter());
+  result.current.incrementAsync();
+  // waitForNextUpdate等待下一次更新，默认会等待1000毫秒
+  await waitForNextUpdate();
+  expect(result.current.count).toBe(1);
 });
