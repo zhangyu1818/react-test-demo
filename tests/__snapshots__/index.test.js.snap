@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshot 测试 1`] = `
+<DocumentFragment>
+  <form>
+    <input
+      name="test"
+      type="text"
+    />
+    <button
+      type="submit"
+    >
+      submit
+    </button>
+  </form>
+</DocumentFragment>
+`;
